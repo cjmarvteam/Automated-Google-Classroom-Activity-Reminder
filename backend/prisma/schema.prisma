@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(cuid())
+  email        String           @unique
+  name         String
+  avatar       String?
+  googleId     String           @unique
+  accessToken  String?
+  refreshToken String?
+  preferences  UserPreference?
+  classrooms   Classroom[]
+  activities   Activity[]
+  notifications Notification[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model UserPreference {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailNotifications Boolean @default(true)
+  studyReminders     Boolean @default(true)
+  reminderTime       String  @default("09:00")
+  timezone           String  @default("Asia/Manila")
+  reminderDaysBefore Int     @default(1)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Classroom {
+  id                 String     @id @default(cuid())
+  userId             String
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  googleClassroomId  String
+  name               String
+  section            String?
+  description        String?
+  alternateLink      String?
+  activities         Activity[]
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@unique([userId, googleClassroomId])
+}
+
+model Activity {
+  id                 String         @id @default(cuid())
+  userId             String
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroomId        String
+  classroom          Classroom      @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  googleActivityId   String     @default("")
+  title              String
+  description        String?
+  type               String         @default("ASSIGNMENT")
+  dueDate            DateTime?
+  dueTime            DateTime?
+  maxPoints          Int?
+  status             String         @default("PENDING")
+  alternateLink      String?
+  notifications      Notification[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@unique([userId, googleActivityId])
+  @@index([userId, dueDate])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  type       String
+  title      String
+  message    String
+  sentAt     DateTime @default(now())
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, createdAt(sort: Desc)])
+}
