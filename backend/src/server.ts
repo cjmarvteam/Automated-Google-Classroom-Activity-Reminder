@@ -8,6 +8,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { execSync } from 'child_process';
 import { connectDatabase } from './config/database';
 import { errorHandler } from './middleware/error.middleware';
 import routes from './routes';
@@ -44,9 +45,28 @@ app.get('/health', (_, res) => {
 // Global error handler - catches unhandled errors from all routes
 app.use(errorHandler);
 
+/**
+ * Push Prisma schema to database
+ * Creates tables if they don't exist
+ */
+const pushDatabase = (): void => {
+  try {
+    logger.info('Pushing database schema...');
+    execSync('npx prisma db push --accept-data-loss --skip-generate', {
+      stdio: 'inherit',
+    });
+    logger.info('Database schema pushed successfully');
+  } catch (error) {
+    logger.error('Failed to push database schema:', error);
+  }
+};
+
 // --- Server Startup ---
 const startServer = async () => {
   try {
+    // Push schema to database (creates tables if missing)
+    pushDatabase();
+
     // Connect to PostgreSQL via Prisma
     await connectDatabase();
 
