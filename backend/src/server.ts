@@ -1,3 +1,6 @@
+// server.ts - Main entry point for the Express backend server
+// Initializes database connection, middleware, routes, and automation scheduler
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -14,24 +17,40 @@ import { ReminderScheduler } from './automation/reminderScheduler';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
+// --- Middleware ---
+// helmet: Adds security headers (X-Content-Type-Options, X-Frame-Options, etc.)
 app.use(helmet());
+
+// cors: Allows frontend (running on different port) to make API requests
+// credentials: true allows cookies/auth headers to be sent cross-origin
 app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+
+// morgan: HTTP request logger - pipes to our custom logger
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+
+// Parse JSON and URL-encoded request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- Routes ---
+// All API routes are prefixed with /api (see routes/index.ts)
 app.use('/api', routes);
 
+// Health check endpoint for monitoring
 app.get('/health', (_, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Global error handler - catches unhandled errors from all routes
 app.use(errorHandler);
 
+// --- Server Startup ---
 const startServer = async () => {
   try {
+    // Connect to PostgreSQL via Prisma
     await connectDatabase();
 
+    // Start the automation scheduler (daily reminders at 9AM, hourly overdue checks)
     const reminderScheduler = new ReminderScheduler();
     reminderScheduler.start();
 

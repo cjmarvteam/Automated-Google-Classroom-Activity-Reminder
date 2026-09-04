@@ -1,3 +1,7 @@
+// authStore.ts - Zustand store for authentication state management
+// Manages JWT token, user data, and authentication status
+// Persists to localStorage for session persistence across page reloads
+
 import { create } from 'zustand';
 import { User } from '../types';
 
@@ -12,6 +16,7 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
+  // Initialize state from localStorage (persists across page reloads)
   token: localStorage.getItem('token'),
   user: (() => {
     try {
@@ -22,19 +27,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   })(),
   isAuthenticated: !!localStorage.getItem('token'),
+
+  /**
+   * setAuth - Called after successful login/register
+   * Saves token and user to both state and localStorage
+   */
   setAuth: (token, user) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     set({ token, user, isAuthenticated: true });
   },
+
+  /**
+   * setUser - Update user data (e.g., after profile update)
+   * Only updates the user object, not the token
+   */
   setUser: (user) => {
     localStorage.setItem('user', JSON.stringify(user));
     set({ user });
   },
+
+  /**
+   * logout - Clear all auth data
+   * Removes from both state and localStorage
+   */
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     set({ token: null, user: null, isAuthenticated: false });
   },
+
   getToken: () => get().token,
 }));

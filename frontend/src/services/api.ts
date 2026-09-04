@@ -1,19 +1,33 @@
+// api.ts - Centralized API client for the frontend
+// Handles all HTTP requests to the backend, including auth headers and response mapping
+// Each function maps to a specific backend endpoint
+
 import { Activity, AppNotification, UserPreferences, AuthResponse, User, Classroom, DashboardData, BackendPreferences } from '../types';
 
+// Base URL is empty because Vite proxy handles /api -> localhost:3000
 const API_BASE = '';
 
+/**
+ * apiFetch - Generic fetch wrapper
+ * Automatically adds:
+ * - Content-Type: application/json header
+ * - JWT token from localStorage to Authorization header
+ * - Error handling for non-OK responses
+ */
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
   };
+  // Attach JWT token if user is logged in
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
   const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
 
+  // Handle HTTP errors (4xx, 5xx)
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: 'Request failed' }));
     throw new Error(error.error || `HTTP ${res.status}`);
@@ -22,6 +36,11 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   return res.json();
 }
 
+/**
+ * Maps backend activity format to frontend Activity type
+ * Backend uses camelCase and includes nested classroom object
+ * Frontend expects: { id, title, subject (from classroom name), dueDate, status, ... }
+ */
 function mapBackendActivity(a: any): Activity {
   return {
     id: a.id,
@@ -38,6 +57,10 @@ function mapBackendActivity(a: any): Activity {
   };
 }
 
+/**
+ * Maps backend notification format to frontend AppNotification type
+ * Normalizes timestamp field (backend uses sentAt or createdAt)
+ */
 function mapBackendNotification(n: any): AppNotification {
   return {
     id: n.id,
@@ -50,6 +73,9 @@ function mapBackendNotification(n: any): AppNotification {
   };
 }
 
+// ==================== AUTH API ====================
+
+/** POST /api/auth/login - Login with email/password, returns token + user */
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   return apiFetch<AuthResponse>('/api/auth/login', {
     method: 'POST',
@@ -57,6 +83,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
   });
 };
 
+/** POST /api/auth/register - Create new account, returns token + user */
 export const register = async (email: string, password: string, name: string): Promise<AuthResponse> => {
   return apiFetch<AuthResponse>('/api/auth/register', {
     method: 'POST',
@@ -64,37 +91,51 @@ export const register = async (email: string, password: string, name: string): P
   });
 };
 
+/** GET /api/auth/google - Get Google OAuth consent screen URL */
 export const getGoogleAuthUrl = async (): Promise<{ url: string }> => {
   return apiFetch<{ url: string }>('/api/auth/google');
 };
 
+/** GET /api/auth/me - Get current user profile (requires auth) */
 export const getProfile = async (): Promise<User> => {
   return apiFetch<User>('/api/auth/me');
 };
 
+/** POST /api/auth/logout - Logout (client-side token removal) */
 export const logoutApi = async (): Promise<void> => {
   return apiFetch<void>('/api/auth/logout', { method: 'POST' });
 };
 
+// ==================== DASHBOARD API ====================
+
+/** GET /api/dashboard - Get dashboard stats (total/pending/overdue activities) */
 export const getDashboard = async (): Promise<DashboardData> => {
   return apiFetch<DashboardData>('/api/dashboard');
 };
 
+// ==================== ACTIVITIES API ====================
+
+/** GET /api/activities - Get all activities for current user */
 export const fetchActivities = async (): Promise<Activity[]> => {
   const data = await apiFetch<{ activities: any[] }>('/api/activities');
   return (data.activities || []).map(mapBackendActivity);
 };
 
+/** GET /api/activities/upcoming - Get upcoming activities (due date in future) */
 export const fetchUpcomingActivities = async (limit = 5): Promise<Activity[]> => {
   const data = await apiFetch<{ activities: any[] }>('/api/activities/upcoming');
   return (data.activities || []).map(mapBackendActivity).slice(0, limit);
 };
 
+// ==================== CLASSROOMS API ====================
+
+/** GET /api/classrooms - Get all classrooms for current user */
 export const fetchClassrooms = async (): Promise<Classroom[]> => {
   const data = await apiFetch<{ classrooms: Classroom[] }>('/api/classrooms');
   return data.classrooms || [];
 };
 
+/** POST /api/classrooms - Create a new classroom manually */
 export const createClassroom = async (data: { name: string; section?: string; description?: string }): Promise<Classroom> => {
   const result = await apiFetch<{ classroom: Classroom }>('/api/classrooms', {
     method: 'POST',
@@ -103,18 +144,24 @@ export const createClassroom = async (data: { name: string; section?: string; de
   return result.classroom;
 };
 
+/** DELETE /api/classrooms/:id - Delete a classroom and its activities */
 export const deleteClassroom = async (id: string): Promise<void> => {
   await apiFetch(`/api/classrooms/${id}`, { method: 'DELETE' });
 };
 
+/** POST /api/classrooms/sync - Sync classrooms from Google Classroom */
 export const syncClassrooms = async (): Promise<{ message: string }> => {
   return apiFetch<{ message: string }>('/api/classrooms/sync', { method: 'POST' });
 };
 
+// ==================== ACTIVITY SYNC API ====================
+
+/** POST /api/activities/sync/:classroomId - Sync activities from Google Classroom */
 export const syncActivities = async (classroomId: string): Promise<{ message: string }> => {
   return apiFetch<{ message: string }>(`/api/activities/sync/${classroomId}`, { method: 'POST' });
 };
 
+/** POST /api/activities - Create a new activity manually */
 export const createActivity = async (data: any): Promise<Activity> => {
   const result = await apiFetch<{ activity: any }>('/api/activities', {
     method: 'POST',
@@ -123,6 +170,7 @@ export const createActivity = async (data: any): Promise<Activity> => {
   return mapBackendActivity(result.activity);
 };
 
+/** PUT /api/activities/:id - Update activity status (PENDING -> COMPLETED, etc.) */
 export const updateActivityStatus = async (id: string, status: string): Promise<void> => {
   await apiFetch(`/api/activities/${id}`, {
     method: 'PUT',
@@ -130,31 +178,42 @@ export const updateActivityStatus = async (id: string, status: string): Promise<
   });
 };
 
+/** DELETE /api/activities/:id - Delete an activity */
 export const deleteActivity = async (id: string): Promise<void> => {
   await apiFetch(`/api/activities/${id}`, { method: 'DELETE' });
 };
 
+// ==================== NOTIFICATIONS API ====================
+
+/** GET /api/notifications - Get all notifications for current user */
 export const fetchNotifications = async (): Promise<AppNotification[]> => {
   const data = await apiFetch<any[]>('/api/notifications');
   return data.map(mapBackendNotification);
 };
 
+/** PUT /api/notifications/:id/read - Mark a single notification as read */
 export const markNotificationRead = async (id: string): Promise<void> => {
   await apiFetch(`/api/notifications/${id}/read`, { method: 'PUT' });
 };
 
+/** PUT /api/notifications/read-all - Mark all notifications as read */
 export const markAllNotificationsRead = async (): Promise<void> => {
   await apiFetch('/api/notifications/read-all', { method: 'PUT' });
 };
 
+/** DELETE /api/notifications/:id - Delete a notification */
 export const deleteNotification = async (id: string): Promise<void> => {
   await apiFetch(`/api/notifications/${id}`, { method: 'DELETE' });
 };
 
+// ==================== PREFERENCES API ====================
+
+/** GET /api/preferences - Get user's notification/study preferences from backend */
 export const getPreferences = async (): Promise<BackendPreferences> => {
   return apiFetch<BackendPreferences>('/api/preferences');
 };
 
+/** PUT /api/preferences - Update user's notification/study preferences */
 export const updatePreferences = async (prefs: Partial<BackendPreferences>): Promise<BackendPreferences> => {
   return apiFetch<BackendPreferences>('/api/preferences', {
     method: 'PUT',
