@@ -3,7 +3,7 @@
 # Pushes Prisma schema to database, then starts the server
 
 echo "Running prisma db push..."
-npx prisma db push --accept-data-loss --skip-generate
+npm run db:push
 
 echo "Starting server..."
-node dist/server.js
+npm run start
