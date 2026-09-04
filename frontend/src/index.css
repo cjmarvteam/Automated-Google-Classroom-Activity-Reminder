@@ -1,0 +1,534 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+}
+
+/* ====================================================
+   EXACT REFERENCE DESIGN SYSTEM
+   ==================================================== */
+
+:root {
+    /* ---- Colors ---- */
+    --color-bg: #f5f0eb;
+    --color-bg-white: #ffffff;
+    --color-primary: #c4845a;
+    --color-primary-dark: #a86d47;
+    --color-secondary: #d4a77a;
+    --color-text: #2c241e;
+    --color-text-muted: rgba(44, 36, 30, 0.5);
+    --color-text-light: #fdf7f2;
+    --color-border: rgba(44, 36, 30, 0.08);
+    --color-border-hover: rgba(44, 36, 30, 0.15);
+    --color-focus: rgba(196, 132, 90, 0.3);
+    --color-danger: #c0392b;
+    --color-success: #27ae60;
+
+    /* ---- Spacing ---- */
+    --section-spacing: 140px;
+    --section-spacing-mobile: 80px;
+    --container-max: 1280px;
+    --text-width: 560px;
+
+    /* ---- Radius ---- */
+    --radius-card: 8px;
+    --radius-button: 6px;
+    --radius-input: 6px;
+}
+
+/* ---- Override Shadcn ---- */
+:root {
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-bg-white);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-bg-white);
+    --popover-foreground: var(--color-text);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-text-light);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-text);
+    --muted: var(--color-bg);
+    --muted-foreground: var(--color-text-muted);
+    --accent: var(--color-primary);
+    --accent-foreground: var(--color-text-light);
+    --destructive: var(--color-danger);
+    --border: var(--color-border);
+    --input: var(--color-border);
+    --ring: var(--color-focus);
+    --radius: 0.625rem;
+}
+
+/* ====================================================
+   BASE STYLES
+   ==================================================== */
+
+@layer base {
+    * {
+        border-color: var(--border);
+        outline-color: var(--ring);
+    }
+
+    body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ---- Typography - Exact Reference ---- */
+    h1, .h1 {
+        font-size: clamp(3.5rem, 8vw, 7rem);
+        font-weight: 600;
+        line-height: 1.04;
+        letter-spacing: -0.035em;
+        color: var(--color-text);
+    }
+
+    h2, .h2 {
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 600;
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+        color: var(--color-text);
+    }
+
+    h3, .h3 {
+        font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+        font-weight: 500;
+        line-height: 1.2;
+        color: var(--color-text);
+    }
+
+    p, .body {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--color-text-muted);
+        max-width: var(--text-width);
+    }
+
+    .label-sm {
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-text-muted);
+    }
+
+    .label-primary {
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--color-primary);
+    }
+
+    /* ---- Scrollbar ---- */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-border);
+        border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-primary);
+    }
+}
+
+/* ====================================================
+   LAYOUT
+   ==================================================== */
+
+.container-editorial {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+    .container-editorial {
+        padding: 0 1.25rem;
+    }
+}
+
+.section {
+    padding: var(--section-spacing) 0;
+}
+
+.section-sm {
+    padding: calc(var(--section-spacing) * 0.6) 0;
+}
+
+.section-large {
+    padding: calc(var(--section-spacing) * 1.4) 0;
+}
+
+@media (max-width: 768px) {
+    .section {
+        padding: var(--section-spacing-mobile) 0;
+    }
+    .section-large {
+        padding: calc(var(--section-spacing-mobile) * 1.4) 0;
+    }
+}
+
+/* ====================================================
+   CARDS - Restrained, No Shadows
+   ==================================================== */
+
+.card-editorial {
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 2rem;
+    transition: border-color 0.2s ease;
+}
+
+.card-editorial:hover {
+    border-color: var(--color-border-hover);
+}
+
+.card-editorial-accent {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-editorial-accent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+}
+
+/* ====================================================
+   BUTTONS - Exact Reference
+   ==================================================== */
+
+.btn-editorial {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 52px;
+    padding: 0 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: var(--radius-button);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    background: transparent;
+    color: var(--color-text);
+}
+
+.btn-editorial-primary {
+    background: var(--color-primary);
+    color: var(--color-text-light);
+    border-color: var(--color-primary);
+}
+.btn-editorial-primary:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.btn-editorial-outline {
+    background: transparent;
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+.btn-editorial-outline:hover {
+    border-color: var(--color-text);
+    background: rgba(44, 36, 30, 0.02);
+}
+
+.btn-editorial-ghost {
+    background: transparent;
+    color: var(--color-text-muted);
+    border-color: transparent;
+}
+.btn-editorial-ghost:hover {
+    color: var(--color-text);
+    background: rgba(44, 36, 30, 0.04);
+}
+
+/* ====================================================
+   FORMS - Exact Reference
+   ==================================================== */
+
+.form-editorial {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-editorial:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-focus);
+}
+.form-editorial::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* ====================================================
+   STATUS BADGES
+   ==================================================== */
+
+.badge-editorial {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 12px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: 1px solid transparent;
+}
+
+.badge-overdue {
+    background: rgba(192, 57, 43, 0.08);
+    color: var(--color-danger);
+    border-color: rgba(192, 57, 43, 0.15);
+}
+.badge-due-today {
+    background: rgba(196, 132, 90, 0.10);
+    color: var(--color-primary-dark);
+    border-color: rgba(196, 132, 90, 0.15);
+}
+.badge-due-soon {
+    background: rgba(212, 167, 122, 0.10);
+    color: #b8875a;
+    border-color: rgba(212, 167, 122, 0.15);
+}
+.badge-upcoming {
+    background: rgba(44, 36, 30, 0.04);
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+}
+.badge-completed {
+    background: rgba(46, 204, 113, 0.08);
+    color: var(--color-success);
+    border-color: rgba(46, 204, 113, 0.15);
+}
+
+/* ====================================================
+   TABLE - Editorial
+   ==================================================== */
+
+.table-editorial {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table-editorial th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+}
+.table-editorial td {
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+.table-editorial tr:hover td {
+    background: rgba(44, 36, 30, 0.02);
+}
+
+/* ====================================================
+   RESPONSIVE HELPERS
+   ==================================================== */
+
+@media (max-width: 640px) {
+    .card-editorial {
+        padding: 1.5rem;
+    }
+    .btn-editorial {
+        height: 46px;
+        padding: 0 1.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ====================================================
+   ANIMATION BASE CLASSES
+   ==================================================== */
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fade In Up */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade In */
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scale In */
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Subtle Pulse (for urgent statuses only) */
+.animate-subtle-pulse {
+  animation: subtlePulse 2s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Stagger children */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.10s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.14s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.18s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.22s; }
+
+/* ====================================================
+   ENHANCED MOTION UTILITIES
+   ==================================================== */
+
+/* Scroll Reveal Helper */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-reveal-scale {
+  opacity: 0;
+  transform: scale(0.97);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Stagger Children */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.10s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.14s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.18s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.22s; }
+
+/* Subtle Hover Lift */
+.hover-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Decorative Divider */
+.divider-editorial {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(44, 36, 30, 0.2);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.divider-editorial::before,
+.divider-editorial::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(44, 36, 30, 0.06);
+}
