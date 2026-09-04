@@ -166,7 +166,7 @@ Automated-Google-Classroom-Activity-Reminder/
 1. The `.env` file in `backend/` contains secrets - DO NOT commit to git (already in .gitignore)
 2. Backend uses Prisma - after any schema change run `npx prisma db push`
 3. Google OAuth only works with published consent screen
-4. The `src/` folder in root is the OLD Mongoose-based code - IGNORE IT. Use `backend/` folder instead.
+4. The active application has exactly two code roots: `backend/` and `frontend/`.
 5. Automation starts automatically when server starts (daily reminders at 9AM, hourly overdue check)
 
 ---
