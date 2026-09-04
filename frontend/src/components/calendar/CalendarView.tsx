@@ -21,46 +21,59 @@ interface Props {
 
 export default function CalendarView({ events, onEventClick }: Props) {
   const eventColors: Record<string, string> = {
-    pending: '#c97a57',
+    pending: '#c4845a',
     in_progress: '#dca77a',
-    completed: '#5cb85c',
+    completed: '#27ae60',
     overdue: '#e74c3c',
   };
 
   const formattedEvents = events.map((e) => ({
     ...e,
-    color: e.color || eventColors[e.extendedProps?.status || 'pending'] || '#c97a57',
+    color: e.color || eventColors[e.extendedProps?.status || 'pending'] || '#c4845a',
     textColor: '#ffffff',
     borderColor: 'transparent',
   }));
 
   return (
-    <div className="glass rounded-xl border border-white/10 p-4 overflow-hidden calendar-wrapper">
+    <div style={{
+      background: '#ffffff',
+      border: '1px solid rgba(44, 36, 30, 0.08)',
+      borderRadius: '12px',
+      padding: '1.5rem',
+      overflow: 'hidden',
+    }} className="calendar-wrapper">
       <style>{`
+        .calendar-wrapper .fc {
+          --fc-border-color: rgba(44, 36, 30, 0.08);
+          --fc-button-bg-color: #ffffff;
+          --fc-button-border-color: rgba(44, 36, 30, 0.12);
+          --fc-button-hover-bg-color: rgba(196, 132, 90, 0.1);
+          --fc-button-hover-border-color: rgba(196, 132, 90, 0.3);
+          --fc-button-active-bg-color: rgba(196, 132, 90, 0.15);
+          --fc-button-active-border-color: rgba(196, 132, 90, 0.4);
+          --fc-today-bg-color: rgba(196, 132, 90, 0.06);
+          --fc-page-bg-color: transparent;
+          --fc-neutral-bg-color: #faf8f5;
+          --fc-list-event-hover-bg-color: rgba(196, 132, 90, 0.05);
+        }
         .calendar-wrapper .fc .fc-toolbar-title {
-          color: var(--foreground);
+          color: #2c241e;
           font-weight: 700;
         }
         .calendar-wrapper .fc .fc-button {
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: var(--foreground);
-          border-radius: 10px;
+          color: #2c241e;
+          border-radius: 6px;
           font-weight: 500;
+          font-size: 0.8rem;
           padding: 6px 14px;
           transition: all 0.2s;
+          box-shadow: none;
         }
         .calendar-wrapper .fc .fc-button:hover {
-          background: rgba(201, 122, 87, 0.2);
-          border-color: rgba(201, 122, 87, 0.3);
+          color: #c4845a;
         }
-        .calendar-wrapper .fc .fc-button-primary:not(:disabled):active,
         .calendar-wrapper .fc .fc-button-primary:not(:disabled).fc-button-active {
-          background: rgba(201, 122, 87, 0.3);
-          border-color: rgba(201, 122, 87, 0.4);
-        }
-        .calendar-wrapper .fc .fc-button-primary:focus {
-          box-shadow: 0 0 0 2px rgba(201, 122, 87, 0.3);
+          color: #c4845a;
         }
         .calendar-wrapper .fc .fc-daygrid-day {
           background: transparent;
@@ -71,23 +84,23 @@ export default function CalendarView({ events, onEventClick }: Props) {
           transition: background 0.2s;
         }
         .calendar-wrapper .fc .fc-daygrid-day-frame:hover {
-          background: rgba(201, 122, 87, 0.06);
+          background: rgba(196, 132, 90, 0.04);
         }
-        .calendar-wrapper .fc .fc-day-today {
-          background: rgba(201, 122, 87, 0.1) !important;
+        .calendar-wrapper .fc .fc-day-today .fc-daygrid-day-frame {
+          background: rgba(196, 132, 90, 0.08) !important;
           border-radius: 8px;
         }
         .calendar-wrapper .fc .fc-daygrid-day-number {
-          color: var(--foreground);
+          color: #2c241e;
           font-size: 0.85rem;
           font-weight: 500;
           padding: 6px 8px;
         }
         .calendar-wrapper .fc .fc-daygrid-day-number:hover {
-          color: #c97a57;
+          color: #c4845a;
         }
         .calendar-wrapper .fc .fc-col-header-cell-cushion {
-          color: var(--muted-foreground);
+          color: rgba(44, 36, 30, 0.5);
           font-weight: 600;
           font-size: 0.75rem;
           text-transform: uppercase;
@@ -105,12 +118,12 @@ export default function CalendarView({ events, onEventClick }: Props) {
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
           margin-bottom: 2px;
         }
         .calendar-wrapper .fc .fc-daygrid-event:hover {
-          transform: scale(1.03);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transform: scale(1.02);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .calendar-wrapper .fc .fc-daygrid-event .fc-event-title {
           font-weight: 500;
@@ -119,32 +132,35 @@ export default function CalendarView({ events, onEventClick }: Props) {
           text-overflow: ellipsis;
         }
         .calendar-wrapper .fc .fc-daygrid-more-link {
-          color: #c97a57;
+          color: #c4845a;
           font-weight: 500;
           font-size: 0.7rem;
         }
         .calendar-wrapper .fc .fc-daygrid-more-link:hover {
-          color: #a66245;
+          color: #a86d47;
         }
         .calendar-wrapper .fc .fc-popover {
-          background: var(--glass-bg);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: #ffffff;
+          border: 1px solid rgba(44, 36, 30, 0.08);
           border-radius: 12px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
         .calendar-wrapper .fc .fc-popover-header {
-          background: transparent;
+          background: #faf8f5;
           padding: 8px 12px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid rgba(44, 36, 30, 0.06);
+          border-radius: 12px 12px 0 0;
         }
         .calendar-wrapper .fc .fc-popover-title {
-          color: var(--foreground);
+          color: #2c241e;
           font-weight: 600;
+          font-size: 0.85rem;
         }
         .calendar-wrapper .fc .fc-popover-close {
-          color: var(--foreground);
-          opacity: 0.6;
+          color: rgba(44, 36, 30, 0.4);
+        }
+        .calendar-wrapper .fc .fc-popover-close:hover {
+          color: #2c241e;
         }
         .calendar-wrapper .fc .fc-popover-body {
           padding: 6px 8px;
