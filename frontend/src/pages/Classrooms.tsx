@@ -5,9 +5,10 @@ import { Classroom } from '../types';
 import { CreateClassroomDialog } from '../components/classrooms/CreateClassroomDialog';
 import { SectionReveal } from '@/components/ui/SectionReveal';
 import { motion } from 'framer-motion';
-import { Plus, BookOpen, Users, Trash2 } from 'lucide-react';
+import { Plus, BookOpen, Users, Trash2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from 'react-router-dom';
 
 export default function Classrooms() {
   const queryClient = useQueryClient();
@@ -54,27 +55,52 @@ export default function Classrooms() {
               Organize your activities by classroom. Add a classroom to get started.
             </p>
           </div>
-          <motion.button
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setCreateOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.625rem 1.25rem',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              borderRadius: '6px',
-              border: 'none',
-              background: '#c4845a',
-              color: '#fdf7f2',
-              cursor: 'pointer',
-            }}
-          >
-            <Plus style={{ width: '16px', height: '16px' }} />
-            Add Classroom
-          </motion.button>
+          <div className="flex gap-2">
+            <Link to="/activities">
+              <motion.button
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.625rem 1.25rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  borderRadius: '6px',
+                  border: '1px solid rgba(44, 36, 30, 0.12)',
+                  background: '#ffffff',
+                  color: '#2c241e',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                }}
+              >
+                <BookOpen style={{ width: '16px', height: '16px' }} />
+                View Activities
+              </motion.button>
+            </Link>
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setCreateOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.625rem 1.25rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                borderRadius: '6px',
+                border: 'none',
+                background: '#c4845a',
+                color: '#fdf7f2',
+                cursor: 'pointer',
+              }}
+            >
+              <Plus style={{ width: '16px', height: '16px' }} />
+              Add Classroom
+            </motion.button>
+          </div>
         </div>
       </SectionReveal>
 
@@ -118,20 +144,24 @@ export default function Classrooms() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.3 }}
+                whileHover={{ y: -2 }}
                 style={{
                   background: '#ffffff',
                   border: '1px solid rgba(44, 36, 30, 0.06)',
                   borderRadius: '8px',
                   padding: '1.5rem',
                   position: 'relative',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s ease',
                 }}
+                onClick={() => window.location.href = '/activities'}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(196, 132, 90, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <BookOpen style={{ width: '20px', height: '20px', color: '#c4845a' }} />
                   </div>
                   <button
-                    onClick={() => handleDelete(classroom)}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(classroom); }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'rgba(44,36,30,0.3)', transition: 'color 0.2s' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#e74c3c'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(44,36,30,0.3)'}
@@ -146,9 +176,14 @@ export default function Classrooms() {
                 {classroom.description && (
                   <p style={{ fontSize: '0.8rem', color: 'rgba(44, 36, 30, 0.4)', marginBottom: '1rem', lineHeight: 1.5 }}>{classroom.description}</p>
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'rgba(44, 36, 30, 0.4)', borderTop: '1px solid rgba(44, 36, 30, 0.04)', paddingTop: '0.75rem' }}>
-                  <Users style={{ width: '14px', height: '14px' }} />
-                  <span>{(classroom as any)._count?.activities || 0} activities</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(44, 36, 30, 0.04)', paddingTop: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'rgba(44, 36, 30, 0.4)' }}>
+                    <Users style={{ width: '14px', height: '14px' }} />
+                    <span>{(classroom as any)._count?.activities || 0} activities</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: 'rgba(44, 36, 30, 0.3)' }}>
+                    View <ArrowRight style={{ width: '12px', height: '12px' }} />
+                  </div>
                 </div>
               </motion.div>
             ))}

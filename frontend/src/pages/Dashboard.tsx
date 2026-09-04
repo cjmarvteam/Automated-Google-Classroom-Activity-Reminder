@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchActivities, fetchUpcomingActivities } from '../services/api';
+import { fetchActivities, fetchUpcomingActivities, fetchClassrooms } from '../services/api';
 import { FocusSession } from '../components/dashboard/FocusSession';
 import { UpcomingActivities } from '../components/dashboard/UpcomingActivities';
 import { LiveMetrics } from '../components/ui/LiveMetrics';
 import { Marquee } from '../components/ui/Marquee';
 import { Reveal } from '../components/ui/Reveal';
 import { SkeletonLoader } from '../components/ui/SkeletonLoader';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, BookOpen, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
@@ -20,6 +20,10 @@ export default function Dashboard() {
   const { data: upcoming = [], isLoading: upcomingLoading } = useQuery({
     queryKey: ['upcoming'],
     queryFn: () => fetchUpcomingActivities(5),
+  });
+  const { data: classrooms = [] } = useQuery({
+    queryKey: ['classrooms'],
+    queryFn: fetchClassrooms,
   });
 
   const isLoading = activitiesLoading || upcomingLoading;
@@ -48,8 +52,13 @@ export default function Dashboard() {
         </Reveal>
         <Reveal delay={0.1}>
           <div className="flex flex-wrap gap-3 mt-4">
-            <Link to="/activities">
+            <Link to="/classrooms">
               <motion.button className="btn-editorial btn-editorial-primary" whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
+                <Users className="w-4 h-4" /> Classrooms
+              </motion.button>
+            </Link>
+            <Link to="/activities">
+              <motion.button className="btn-editorial btn-editorial-outline" whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
                 View Activities <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
@@ -66,10 +75,39 @@ export default function Dashboard() {
         <div className="flex items-center gap-4 mb-4">
           <span className="text-sm font-mono text-gray-300">01</span>
           <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-xs uppercase tracking-wider text-gray-400">Metrics</span>
+          <span className="text-xs uppercase tracking-wider text-gray-400">Quick Stats</span>
         </div>
         <Reveal>
-          {isLoading ? <SkeletonLoader variant="card" /> : <LiveMetrics />}
+          {isLoading ? <SkeletonLoader variant="card" /> : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Classrooms', value: classrooms.length, icon: Users, color: '#c4845a' },
+                { label: 'Activities', value: allActivities?.length || 0, icon: BookOpen, color: '#d4a77a' },
+                { label: 'Upcoming', value: upcoming.length, icon: Calendar, color: '#2c241e' },
+                { label: 'Completed', value: allActivities?.filter(a => a.status === 'completed').length || 0, icon: ArrowRight, color: '#27ae60' },
+              ].map((stat) => (
+                <motion.div
+                  key={stat.label}
+                  whileHover={{ y: -2 }}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid rgba(44, 36, 30, 0.06)',
+                    borderRadius: '8px',
+                    padding: '1.25rem',
+                    cursor: 'default',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: `${stat.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <stat.icon style={{ width: '16px', height: '16px', color: stat.color }} />
+                    </div>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(44, 36, 30, 0.4)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</span>
+                  </div>
+                  <span style={{ fontSize: '1.75rem', fontWeight: 600, color: '#2c241e' }}>{stat.value}</span>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </Reveal>
       </section>
 
@@ -88,7 +126,7 @@ export default function Dashboard() {
 
       <section>
         <div className="flex items-center gap-4 mb-4">
-          <span className="text-sm font-mono text-gray-300">03</span>
+          <span className="text-sm font-mono text-gray-300">{subjects.length > 0 ? '03' : '02'}</span>
           <div className="h-px flex-1 bg-gray-200" />
           <span className="text-xs uppercase tracking-wider text-gray-400">Focus</span>
         </div>
@@ -108,7 +146,7 @@ export default function Dashboard() {
 
       <section>
         <div className="flex items-center gap-4 mb-4">
-          <span className="text-sm font-mono text-gray-300">04</span>
+          <span className="text-sm font-mono text-gray-300">{subjects.length > 0 ? '04' : '03'}</span>
           <div className="h-px flex-1 bg-gray-200" />
           <span className="text-xs uppercase tracking-wider text-gray-400">Calendar</span>
         </div>

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Settings, LogOut, Sparkles } from 'lucide-react';
+import { Settings, LogOut, Sparkles, BookOpen } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { logoutApi } from '../../services/api';
 
@@ -70,6 +70,13 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => navigate('/classrooms')}
+          style={{ gap: '0.5rem', cursor: 'pointer' }}
+        >
+          <BookOpen style={{ width: '16px', height: '16px' }} />
+          <span>My Classrooms</span>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => navigate('/settings')}
           style={{ gap: '0.5rem', cursor: 'pointer' }}
