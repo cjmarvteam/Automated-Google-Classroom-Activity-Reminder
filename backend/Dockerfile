@@ -1,19 +1,19 @@
-FROM node:18-slim
+FROM node:20-slim
 
 WORKDIR /app
 
-# Install dependencies
+# Install build and runtime dependencies.
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci
 
-# Copy prisma schema
+# Generate Prisma Client and compile TypeScript inside the image. Build output is
+# intentionally not committed to Git, so Railway must create dist/ here.
 COPY prisma ./prisma/
+COPY tsconfig.json ./
+COPY src ./src/
+RUN npm run build
 
-# Generate Prisma Client
-RUN npx prisma generate
+# Keep Prisma because Railway runs `npm run db:push` before starting this image.
+RUN npm prune --omit=dev
 
-# Copy built source
-COPY dist ./dist/
-
-# Push database schema and start server
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && node dist/server.js"]
+CMD ["npm", "run", "start"]

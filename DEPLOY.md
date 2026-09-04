@@ -38,9 +38,10 @@ EMAIL_PASS=your_app_password
 2. Copy the public domain (e.g., `https://classroom-api.up.railway.app`)
 
 ### Step 6: Verify the Database Setup
-Railway reads `backend/railway.json` and runs `npm run db:push` as a pre-deploy
-command before starting the API. The deployment stops if Prisma cannot create or
-update the tables, so a broken database setup cannot appear as a healthy release.
+Railway reads `backend/railway.json`, builds the API with `backend/Dockerfile`,
+and runs `npm run db:push` as a pre-deploy command before starting the API. The
+deployment stops if Prisma cannot create or update the tables, so a broken
+database setup cannot appear as a healthy release.
 
 After deployment, confirm the deploy logs contain Prisma's successful database
 sync message, then open:
