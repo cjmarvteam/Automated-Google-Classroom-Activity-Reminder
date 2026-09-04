@@ -1,8 +1,5 @@
 # AGENTS.md - Project Continuation Guide
 
-## IMPORTANT: COMMUNICATION STYLE
-**Always talk in Taglish (mix of Tagalog and English) with the user. Example: "Gagawin ko na ang frontend", "Ano next na gagawin natin?"**
-
 ## Project: Automated Google Classroom Activity Reminder
 
 ### Overview
@@ -10,7 +7,7 @@ A web application that connects to Google Classroom, syncs courses and activitie
 
 ---
 
-## COMPLETED ✅
+## Tech Stack
 
 ### Backend (`backend/` folder)
 - **Framework:** Express.js + TypeScript
@@ -20,7 +17,7 @@ A web application that connects to Google Classroom, syncs courses and activitie
 
 #### How to run backend:
 ```powershell
-cd "C:\Users\burgo_w8uuyg3\OneDrive\Desktop\Automated-Google-Classroom-Activity-Reminder\backend"
+cd backend
 npm install
 npx prisma generate
 npx prisma db push
@@ -28,7 +25,26 @@ npx ts-node src/server.ts
 ```
 Server runs on `http://localhost:3000`
 
-#### API Endpoints:
+### Frontend (`frontend/` folder)
+- **Framework:** React 19 + Vite 8 + TypeScript
+- **Styling:** Tailwind CSS 4 + shadcn/ui
+- **State:** Zustand
+- **Data Fetching:** TanStack React Query
+- **Routing:** React Router DOM v7
+- **Calendar:** FullCalendar
+
+#### How to run frontend:
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+Dev server runs on `http://localhost:5173`
+
+---
+
+## API Endpoints
+
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
 | POST | /api/auth/register | Register user | No |
@@ -67,26 +83,8 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## IN PROGRESS 🔄
+## Frontend API Reference
 
-### Frontend (`Automated-Google-Classroom-Activity-Reminder-main/` folder)
-- **Framework:** React 19 + Vite 8 + TypeScript
-- **Styling:** Tailwind CSS 4 + shadcn/ui
-- **State:** Zustand
-- **Data Fetching:** TanStack React Query
-- **Routing:** React Router DOM v7
-- **Calendar:** FullCalendar
-
-**STATUS:** Scaffolded only - `src/` folder does NOT exist yet. No React code written.
-
-**ASSIGNED TO:** Teammate (NOT the user)
-
-**Frontend folder path:**
-```
-C:\Users\burgo_w8uuyg3\OneDrive\Desktop\Automated-Google-Classroom-Activity-Reminder\Automated-Google-Classroom-Activity-Reminder-main\Automated-Google-Classroom-Activity-Reminder-main
-```
-
-#### Frontend API Reference (for teammate):
 - Base URL: `http://localhost:3000`
 - Auth: JWT Bearer token in Authorization header
 - Login: `POST /api/auth/login` → `{ email, password }` → `{ token, user }`
@@ -101,41 +99,22 @@ C:\Users\burgo_w8uuyg3\OneDrive\Desktop\Automated-Google-Classroom-Activity-Remi
 
 ---
 
-## DATABASE CONFIG
-
-### PostgreSQL Connection:
-```
-Host: localhost
-Port: 5432
-Database: classroom_reminder
-Username: postgres
-Password: MERV1234
-URL: postgresql://postgres:MERV1234@localhost:5432/classroom_reminder?schema=public
-```
-
-### psql command:
-```powershell
-& "C:\Program Files\PostgreSQL\14\bin\psql.exe" -U postgres -p 5432
-\c classroom_reminder
-```
+## Database Schema
 
 ### Prisma Schema Location:
 `backend/prisma/schema.prisma`
 
 ### Tables:
-- User (id, email, name, avatar, googleId, accessToken, refreshToken)
-- UserPreference (userId, emailNotifications, studyReminders, reminderTime, timezone, reminderDaysBefore)
-- Classroom (userId, googleClassroomId, name, section, description, alternateLink)
-- Activity (userId, classroomId, googleActivityId, title, description, type, dueDate, dueTime, maxPoints, status, alternateLink)
-- Notification (userId, activityId, type, title, message, sentAt, read)
+- **User** (id, email, name, avatar, googleId, accessToken, refreshToken)
+- **UserPreference** (userId, emailNotifications, studyReminders, reminderTime, timezone, reminderDaysBefore)
+- **Classroom** (userId, googleClassroomId, name, section, description, alternateLink)
+- **Activity** (userId, classroomId, googleActivityId, title, description, type, dueDate, dueTime, maxPoints, status, alternateLink)
+- **Notification** (userId, activityId, type, title, message, sentAt, read)
 
 ---
 
-## GOOGLE OAUTH CONFIG
+## Google OAuth Config
 
-### Google Cloud Console Project: classroom-reminder
-- **Client ID:** `YOUR_GOOGLE_CLIENT_ID`
-- **Client Secret:** `YOUR_GOOGLE_CLIENT_SECRET`
 - **Redirect URI:** http://localhost:3000/api/auth/google/callback
 - **Scopes:**
   - classroom.courses.readonly
@@ -145,28 +124,54 @@ URL: postgresql://postgres:MERV1234@localhost:5432/classroom_reminder?schema=pub
   - userinfo.profile
 
 ### Google OAuth Flow:
-1. GET /api/auth/google → returns { url: "google auth url" }
+1. GET /api/auth/google → returns `{ url: "google auth url" }`
 2. User opens URL in browser → logs in → clicks Allow
-3. Google redirects to /api/auth/google/callback with code
+3. Google redirects to `/api/auth/google/callback` with code
 4. Backend exchanges code for tokens → creates/updates user → returns JWT token
 
 ---
 
-## TEAM INFO
+## Project Structure
 
-- **GitHub Org:** cjmarvteam
-- **Repo:** https://github.com/cjmarvteam/Automated-Google-Classroom-Activity-Reminder
-- **User Email:** 24-64674@g.batstate-u.edu.ph
-- **User Name:** MARVIN LAURENCE BURGOS
-- **Role:** Backend developer
-- **Teammates:** Handling frontend
+```
+Automated-Google-Classroom-Activity-Reminder/
+├── backend/                  # Express.js API server
+│   ├── prisma/               # Database schema
+│   ├── src/
+│   │   ├── controllers/      # Route handlers
+│   │   ├── middleware/        # Auth, error handling
+│   │   ├── routes/           # Express routes
+│   │   ├── services/         # Business logic
+│   │   ├── validators/       # Input validation
+│   │   ├── utils/            # Helper functions
+│   │   └── server.ts         # Entry point
+│   └── .env                  # Environment variables
+├── frontend/                 # React SPA
+│   ├── src/
+│   │   ├── components/       # UI components
+│   │   ├── pages/            # Route pages
+│   │   ├── store/            # Zustand stores
+│   │   ├── services/         # API calls
+│   │   ├── hooks/            # Custom hooks
+│   │   ├── types/            # TypeScript types
+│   │   └── App.tsx           # Root component
+│   └── vite.config.ts        # Vite config with API proxy
+└── AGENTS.md                 # This file
+```
 
 ---
 
-## IMPORTANT NOTES
+## Important Notes
 
 1. The `.env` file in `backend/` contains secrets - DO NOT commit to git (already in .gitignore)
 2. Backend uses Prisma - after any schema change run `npx prisma db push`
 3. Google OAuth only works with published consent screen
 4. The `src/` folder in root is the OLD Mongoose-based code - IGNORE IT. Use `backend/` folder instead.
 5. Automation starts automatically when server starts (daily reminders at 9AM, hourly overdue check)
+
+---
+
+## Git Repository
+
+- **GitHub Org:** cjmarvteam
+- **Repo:** https://github.com/cjmarvteam/Automated-Google-Classroom-Activity-Reminder
