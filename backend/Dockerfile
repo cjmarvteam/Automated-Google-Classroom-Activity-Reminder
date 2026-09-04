@@ -2,6 +2,11 @@ FROM node:20-slim
 
 WORKDIR /app
 
+# Prisma's native query engine requires OpenSSL at build time and runtime.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install build and runtime dependencies.
 COPY package*.json ./
 RUN npm ci
