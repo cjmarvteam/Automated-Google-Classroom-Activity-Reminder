@@ -21,4 +21,6 @@ RUN npm run build
 # Keep Prisma because Railway runs `npm run db:push` before starting this image.
 RUN npm prune --omit=dev
 
-CMD ["npm", "run", "start"]
+# Railway always executes the Dockerfile command. Synchronize the schema here so
+# local/CLI deployments cannot bypass database setup, and stop if it fails.
+CMD ["sh", "-c", "npm run db:push && npm run start"]
