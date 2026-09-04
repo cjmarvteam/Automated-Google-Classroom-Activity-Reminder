@@ -47,6 +47,20 @@ app.use(errorHandler);
 // --- Server Startup ---
 const startServer = async () => {
   try {
+    // Push Prisma schema to database (creates tables if missing)
+    // This runs automatically on every startup to ensure tables exist
+    try {
+      const { execSync } = await import('child_process');
+      logger.info('Pushing database schema...');
+      execSync('npx prisma db push --accept-data-loss --skip-generate', {
+        stdio: 'inherit',
+        timeout: 60000,
+      });
+      logger.info('Database schema pushed successfully');
+    } catch (pushError) {
+      logger.error('Schema push failed, attempting to continue:', pushError);
+    }
+
     // Connect to PostgreSQL via Prisma
     await connectDatabase();
 
