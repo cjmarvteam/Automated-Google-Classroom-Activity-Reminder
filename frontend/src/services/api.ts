@@ -4,8 +4,10 @@
 
 import { Activity, AppNotification, UserPreferences, AuthResponse, User, Classroom, DashboardData, BackendPreferences } from '../types';
 
-// Base URL is empty because Vite proxy handles /api -> localhost:3000
-const API_BASE = '';
+// API Base URL:
+// - In development: empty string (Vite proxy handles /api -> localhost:3000)
+// - In production: uses VITE_API_URL environment variable (set in Vercel dashboard)
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 /**
  * apiFetch - Generic fetch wrapper
