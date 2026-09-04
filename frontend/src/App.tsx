@@ -11,6 +11,7 @@ import Activities from './pages/Activities';
 import Calendar from './pages/Calendar';
 import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
+import Classrooms from './pages/Classrooms';
 import { Toast } from './components/ui/Toast';
 import { PageTransition } from './components/ui/PageTransition';
 import { ProtectedRoute, GuestRoute } from './components/auth/ProtectedRoute';
@@ -44,6 +45,9 @@ function AppRoutes() {
         } />
         <Route path="/activities" element={
           <ProtectedRoute><PageTransition><Activities /></PageTransition></ProtectedRoute>
+        } />
+        <Route path="/classrooms" element={
+          <ProtectedRoute><PageTransition><Classrooms /></PageTransition></ProtectedRoute>
         } />
         <Route path="/calendar" element={
           <ProtectedRoute><PageTransition><Calendar /></PageTransition></ProtectedRoute>

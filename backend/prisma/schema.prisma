@@ -41,7 +41,7 @@ model Classroom {
   id                 String     @id @default(cuid())
   userId             String
   user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  googleClassroomId  String
+  googleClassroomId  String     @default("")
   name               String
   section            String?
   description        String?

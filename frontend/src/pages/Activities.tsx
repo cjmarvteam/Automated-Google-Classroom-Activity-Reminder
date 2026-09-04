@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchActivities, updateActivityStatus } from '../services/api';
+import { fetchActivities, fetchClassrooms, updateActivityStatus, deleteActivity } from '../services/api';
 import { ActivityTable } from '../components/activities/ActivityTable';
 import { ActivityFilters } from '../components/activities/ActivityFilters';
 import { ActivityCard } from '../components/activities/ActivityCard';
 import { ActivityDetailDialog } from '../components/activities/ActivityDetailDialog';
+import { CreateActivityDialog } from '../components/activities/CreateActivityDialog';
 import { Activity } from '../types';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
 import { SectionReveal } from '@/components/ui/SectionReveal';
 import { motion } from 'framer-motion';
 import { staggerContainer, staggerItem } from '@/lib/motion';
+import { Plus } from 'lucide-react';
 
 export default function Activities() {
   const queryClient = useQueryClient();
@@ -20,12 +22,17 @@ export default function Activities() {
     queryKey: ['activities'],
     queryFn: fetchActivities,
   });
+  const { data: classrooms = [] } = useQuery({
+    queryKey: ['classrooms'],
+    queryFn: fetchClassrooms,
+  });
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   const timer = usePomodoro();
@@ -64,6 +71,25 @@ export default function Activities() {
     }
   };
 
+  const handleDelete = async (activity: Activity) => {
+    if (!confirm(`Delete "${activity.title}"?`)) return;
+    try {
+      await deleteActivity(activity.id);
+      setDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming'] });
+      toast.success('Activity deleted');
+    } catch {
+      toast.error('Failed to delete activity');
+    }
+  };
+
+  const refreshAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['activities'] });
+    queryClient.invalidateQueries({ queryKey: ['upcoming'] });
+    queryClient.invalidateQueries({ queryKey: ['classrooms'] });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -84,12 +110,35 @@ export default function Activities() {
   return (
     <div className="space-y-6">
       <SectionReveal>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          <span className="label-sm" style={{ color: '#c4845a' }}>Activity List</span>
-          <h1 style={{ fontSize: 'clamp(2rem, 3vw, 2.75rem)', fontWeight: 600, lineHeight: 1.1, letterSpacing: '-0.02em', color: '#2c241e' }}>All Activities</h1>
-          <p style={{ fontSize: '0.95rem', lineHeight: 1.6, color: 'rgba(44, 36, 30, 0.5)', maxWidth: '480px' }}>
-            Manage all your academic tasks and assignments in one focused workspace.
-          </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <span className="label-sm" style={{ color: '#c4845a' }}>Activity List</span>
+            <h1 style={{ fontSize: 'clamp(2rem, 3vw, 2.75rem)', fontWeight: 600, lineHeight: 1.1, letterSpacing: '-0.02em', color: '#2c241e' }}>All Activities</h1>
+            <p style={{ fontSize: '0.95rem', lineHeight: 1.6, color: 'rgba(44, 36, 30, 0.5)', maxWidth: '480px' }}>
+              Manage all your academic tasks and assignments in one focused workspace.
+            </p>
+          </div>
+          <motion.button
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setCreateOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.625rem 1.25rem',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              borderRadius: '6px',
+              border: 'none',
+              background: '#c4845a',
+              color: '#fdf7f2',
+              cursor: 'pointer',
+            }}
+          >
+            <Plus style={{ width: '16px', height: '16px' }} />
+            Add Activity
+          </motion.button>
         </div>
       </SectionReveal>
 
@@ -124,6 +173,7 @@ export default function Activities() {
       </SectionReveal>
 
       <ActivityDetailDialog activity={selectedActivity} open={dialogOpen} onOpenChange={setDialogOpen} onStartFocus={handleStartFocus} onMarkComplete={handleMarkComplete} />
+      <CreateActivityDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={refreshAll} classrooms={classrooms} />
     </div>
   );
 }

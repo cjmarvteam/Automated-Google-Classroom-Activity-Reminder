@@ -26,6 +26,7 @@ export function Navbar() {
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard' },
+    { to: '/classrooms', label: 'Classrooms' },
     { to: '/activities', label: 'Activities' },
     { to: '/calendar', label: 'Calendar' },
   ];

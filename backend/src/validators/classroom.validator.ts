@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const classroomSchema = z.object({
-  googleClassroomId: z.string().min(1, 'Google Classroom ID is required'),
+  googleClassroomId: z.string().optional().default('manual'),
   name: z.string().min(1, 'Classroom name is required'),
   section: z.string().optional(),
   description: z.string().optional(),

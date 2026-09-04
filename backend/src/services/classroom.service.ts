@@ -24,8 +24,16 @@ export class ClassroomService {
 
   async createClassroom(data: any, userId: string) {
     const prisma = getPrisma();
+    const googleClassroomId = data.googleClassroomId || `manual-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     return prisma.classroom.create({
-      data: { ...data, userId }
+      data: {
+        name: data.name,
+        section: data.section,
+        description: data.description,
+        alternateLink: data.alternateLink,
+        googleClassroomId,
+        userId
+      }
     });
   }
 

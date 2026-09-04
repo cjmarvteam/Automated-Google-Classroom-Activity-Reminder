@@ -81,17 +81,30 @@ export const getDashboard = async (): Promise<DashboardData> => {
 };
 
 export const fetchActivities = async (): Promise<Activity[]> => {
-  const data = await apiFetch<any[]>('/api/activities');
-  return data.map(mapBackendActivity);
+  const data = await apiFetch<{ activities: any[] }>('/api/activities');
+  return (data.activities || []).map(mapBackendActivity);
 };
 
 export const fetchUpcomingActivities = async (limit = 5): Promise<Activity[]> => {
-  const data = await apiFetch<any[]>('/api/activities/upcoming');
-  return data.map(mapBackendActivity).slice(0, limit);
+  const data = await apiFetch<{ activities: any[] }>('/api/activities/upcoming');
+  return (data.activities || []).map(mapBackendActivity).slice(0, limit);
 };
 
 export const fetchClassrooms = async (): Promise<Classroom[]> => {
-  return apiFetch<Classroom[]>('/api/classrooms');
+  const data = await apiFetch<{ classrooms: Classroom[] }>('/api/classrooms');
+  return data.classrooms || [];
+};
+
+export const createClassroom = async (data: { name: string; section?: string; description?: string }): Promise<Classroom> => {
+  const result = await apiFetch<{ classroom: Classroom }>('/api/classrooms', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return result.classroom;
+};
+
+export const deleteClassroom = async (id: string): Promise<void> => {
+  await apiFetch(`/api/classrooms/${id}`, { method: 'DELETE' });
 };
 
 export const syncClassrooms = async (): Promise<{ message: string }> => {
@@ -103,11 +116,11 @@ export const syncActivities = async (classroomId: string): Promise<{ message: st
 };
 
 export const createActivity = async (data: any): Promise<Activity> => {
-  const result = await apiFetch<any>('/api/activities', {
+  const result = await apiFetch<{ activity: any }>('/api/activities', {
     method: 'POST',
     body: JSON.stringify(data),
   });
-  return mapBackendActivity(result);
+  return mapBackendActivity(result.activity);
 };
 
 export const updateActivityStatus = async (id: string, status: string): Promise<void> => {
