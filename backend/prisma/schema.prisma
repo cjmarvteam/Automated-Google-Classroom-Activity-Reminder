@@ -11,6 +11,7 @@ model User {
   id           String           @id @default(cuid())
   email        String           @unique
   name         String
+  password     String?
   avatar       String?
   googleId     String           @unique
   accessToken  String?
@@ -76,18 +77,18 @@ model Activity {
 }
 
 model Notification {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activityId String
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityId String?
+  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
   type       String
   title      String
   message    String
-  sentAt     DateTime @default(now())
-  read       Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  sentAt     DateTime  @default(now())
+  read       Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([userId, createdAt(sort: Desc)])
 }

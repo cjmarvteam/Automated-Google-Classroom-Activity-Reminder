@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { oauth2Client, SCOPES } from '../config/google';
 import { getPrisma } from '../config/database';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { logger } from '../utils/logger';
+
+const SALT_ROUNDS = 10;
 
 export class AuthController {
   getGoogleAuthUrl = async (_req: Request, res: Response): Promise<void> => {
@@ -84,6 +87,17 @@ export class AuthController {
   register = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password, name } = req.body;
+
+      if (!email || !password || !name) {
+        res.status(400).json({ error: 'Email, password, and name are required' });
+        return;
+      }
+
+      if (password.length < 6) {
+        res.status(400).json({ error: 'Password must be at least 6 characters' });
+        return;
+      }
+
       const prisma = getPrisma();
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -92,8 +106,10 @@ export class AuthController {
         return;
       }
 
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
       const user = await prisma.user.create({
-        data: { email, name, googleId: email }
+        data: { email, name, password: hashedPassword, googleId: email }
       });
 
       const token = jwt.sign(
@@ -111,13 +127,27 @@ export class AuthController {
 
   login = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { email } = req.body;
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        res.status(400).json({ error: 'Email and password are required' });
+        return;
+      }
+
       const prisma = getPrisma();
 
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
-        res.status(401).json({ error: 'Invalid credentials' });
+        res.status(401).json({ error: 'Invalid email or password' });
         return;
+      }
+
+      if (user.password) {
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+          res.status(401).json({ error: 'Invalid email or password' });
+          return;
+        }
       }
 
       const token = jwt.sign(

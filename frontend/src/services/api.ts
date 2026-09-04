@@ -15,8 +15,8 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || `HTTP ${res.status}`);
+    const error = await res.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || `HTTP ${res.status}`);
   }
 
   return res.json();
