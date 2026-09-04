@@ -2,7 +2,7 @@
 // Sets up routing, state management providers, and page transitions
 // All pages are wrapped with ProtectedRoute or GuestRoute for auth guard
 
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AnimatePresence } from 'framer-motion';
@@ -76,6 +76,15 @@ function AppRoutes() {
         } />
         <Route path="/settings" element={
           <ProtectedRoute><PageTransition><Settings /></PageTransition></ProtectedRoute>
+        } />
+        <Route path="*" element={
+          <PageTransition>
+            <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
+              <h1 style={{ fontSize: '4rem', fontWeight: 700, color: '#c4845a' }}>404</h1>
+              <p style={{ fontSize: '1rem', color: 'rgba(44, 36, 30, 0.5)' }}>Page not found</p>
+              <Link to="/" style={{ color: '#c4845a', textDecoration: 'none', fontWeight: 500 }}>Go Home</Link>
+            </div>
+          </PageTransition>
         } />
       </Routes>
     </AnimatePresence>

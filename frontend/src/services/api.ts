@@ -100,7 +100,8 @@ export const getGoogleAuthUrl = async (): Promise<{ url: string }> => {
 
 /** GET /api/auth/me - Get current user profile (requires auth) */
 export const getProfile = async (): Promise<User> => {
-  return apiFetch<User>('/api/auth/me');
+  const data = await apiFetch<{ user: User }>('/api/auth/me');
+  return data.user;
 };
 
 /** POST /api/auth/logout - Logout (client-side token removal) */
@@ -110,9 +111,13 @@ export const logoutApi = async (): Promise<void> => {
 
 // ==================== DASHBOARD API ====================
 
-/** GET /api/dashboard - Get dashboard stats (total/pending/overdue activities) */
-export const getDashboard = async (): Promise<DashboardData> => {
-  return apiFetch<DashboardData>('/api/dashboard');
+/** GET /api/dashboard - Get dashboard stats */
+export const getDashboard = async (): Promise<{
+  stats: { totalActivities: number; pendingActivities: number; overdueActivities: number; completedActivities: number; totalClassrooms: number };
+  upcomingActivities: any[];
+  recentNotifications: any[];
+}> => {
+  return apiFetch('/api/dashboard');
 };
 
 // ==================== ACTIVITIES API ====================
@@ -189,8 +194,8 @@ export const deleteActivity = async (id: string): Promise<void> => {
 
 /** GET /api/notifications - Get all notifications for current user */
 export const fetchNotifications = async (): Promise<AppNotification[]> => {
-  const data = await apiFetch<any[]>('/api/notifications');
-  return data.map(mapBackendNotification);
+  const data = await apiFetch<{ notifications: any[] }>('/api/notifications');
+  return (data.notifications || []).map(mapBackendNotification);
 };
 
 /** PUT /api/notifications/:id/read - Mark a single notification as read */
@@ -212,13 +217,15 @@ export const deleteNotification = async (id: string): Promise<void> => {
 
 /** GET /api/preferences - Get user's notification/study preferences from backend */
 export const getPreferences = async (): Promise<BackendPreferences> => {
-  return apiFetch<BackendPreferences>('/api/preferences');
+  const data = await apiFetch<{ preferences: BackendPreferences }>('/api/preferences');
+  return data.preferences;
 };
 
 /** PUT /api/preferences - Update user's notification/study preferences */
 export const updatePreferences = async (prefs: Partial<BackendPreferences>): Promise<BackendPreferences> => {
-  return apiFetch<BackendPreferences>('/api/preferences', {
+  const data = await apiFetch<{ preferences: BackendPreferences }>('/api/preferences', {
     method: 'PUT',
     body: JSON.stringify(prefs),
   });
+  return data.preferences;
 };

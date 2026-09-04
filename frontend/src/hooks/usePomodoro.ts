@@ -1,22 +1,29 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTimerStore } from '../store/timerStore';
 import { usePreferencesStore } from '../store/preferencesStore';
 
 export const usePomodoro = () => {
   const timer = useTimerStore();
   const { focusTechnique } = usePreferencesStore();
+  const tickRef = useRef(timer.tick);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      timer.tick();
-    }, 1000);
-    return () => clearInterval(interval);
+    tickRef.current = timer.tick;
   }, [timer.tick]);
 
   useEffect(() => {
-    // Update timer duration when technique changes
+    const interval = setInterval(() => {
+      tickRef.current();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     timer.setDuration(focusTechnique.studyDuration * 60);
-  }, [focusTechnique, timer.setDuration]);
+    if (focusTechnique.sessionsBeforeLongBreak) {
+      timer.setTotalSessions(focusTechnique.sessionsBeforeLongBreak);
+    }
+  }, [focusTechnique, timer.setDuration, timer.setTotalSessions]);
 
   return timer;
 };

@@ -2,21 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchNotifications, markNotificationRead } from '../services/api';
 import { usePreferencesStore } from '../store/preferencesStore';
 import { useTimerStore } from '../store/timerStore';
-import { useAuthStore } from '../store/authStore';
 import { isWithinQuietHours } from '../lib/utils';
+import { useAuthStore } from '../store/authStore';
 
 export const useNotifications = () => {
   const queryClient = useQueryClient();
   const { quietHours, deepWorkMode } = usePreferencesStore();
   const { mode } = useTimerStore();
-  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications'],
     queryFn: fetchNotifications,
-    enabled: Boolean(token),
-    retry: false,
-    refetchInterval: 30000,
+    refetchInterval: isAuthenticated ? 30000 : false,
+    enabled: isAuthenticated,
   });
 
   const markReadMutation = useMutation({

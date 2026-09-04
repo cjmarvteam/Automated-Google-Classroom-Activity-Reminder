@@ -37,11 +37,11 @@ export default function Settings() {
     setSaving(true);
     try {
       await saveMutation.mutateAsync({
-        emailNotifications: true,
-        studyReminders: true,
+        emailNotifications: backendPrefs?.emailNotifications ?? true,
+        studyReminders: backendPrefs?.studyReminders ?? true,
         reminderTime: `${String(Math.floor(prefs.reminderTiming / 60)).padStart(2, '0')}:${String(prefs.reminderTiming % 60).padStart(2, '0')}`,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        reminderDaysBefore: Math.ceil(prefs.reminderTiming / 1440) || 1,
+        reminderDaysBefore: Math.max(1, Math.ceil(prefs.reminderTiming / 1440)),
       });
     } finally {
       setSaving(false);

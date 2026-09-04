@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { FocusTechnique, UserPreferences } from '../types';
 
 interface PreferencesState extends UserPreferences {
@@ -21,16 +22,23 @@ const defaultPreferences: UserPreferences = {
   deepWorkMode: false,
 };
 
-export const usePreferencesStore = create<PreferencesState>((set) => ({
-  ...defaultPreferences,
-  setFocusTechnique: (technique) => set({ focusTechnique: technique }),
-  setQuietHours: (enabled, start, end) => set((state) => ({
-    quietHours: {
-      enabled,
-      start: start ?? state.quietHours.start,
-      end: end ?? state.quietHours.end,
-    },
-  })),
-  toggleDeepWorkMode: () => set((state) => ({ deepWorkMode: !state.deepWorkMode })),
-  setReminderTiming: (reminderTiming) => set({ reminderTiming }),
-}));
+export const usePreferencesStore = create<PreferencesState>()(
+  persist(
+    (set) => ({
+      ...defaultPreferences,
+      setFocusTechnique: (technique) => set({ focusTechnique: technique }),
+      setQuietHours: (enabled, start, end) => set((state) => ({
+        quietHours: {
+          enabled,
+          start: start ?? state.quietHours.start,
+          end: end ?? state.quietHours.end,
+        },
+      })),
+      toggleDeepWorkMode: () => set((state) => ({ deepWorkMode: !state.deepWorkMode })),
+      setReminderTiming: (reminderTiming) => set({ reminderTiming }),
+    }),
+    {
+      name: 'classremind-preferences',
+    }
+  )
+);

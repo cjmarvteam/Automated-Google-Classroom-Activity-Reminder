@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { login as loginApi, getGoogleAuthUrl } from '../services/api';
 import { GraduationCap, ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +26,8 @@ export default function Login() {
       const res = await loginApi(email, password);
       setAuth(res.token, res.user);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } catch (err: any) {
       toast.error(err.message || 'Login failed');
     } finally {

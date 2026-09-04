@@ -33,6 +33,7 @@ export interface Classroom {
   section?: string;
   description?: string;
   alternateLink?: string;
+  _count?: { activities: number };
 }
 
 /**
@@ -123,10 +124,13 @@ export interface AuthResponse {
  * Returned by /api/dashboard
  */
 export interface DashboardData {
-  totalClassrooms: number;
-  totalActivities: number;
-  pendingActivities: number;
-  overdueActivities: number;
-  completedActivities: number;
+  stats: {
+    totalClassrooms: number;
+    totalActivities: number;
+    pendingActivities: number;
+    overdueActivities: number;
+    completedActivities?: number;
+  };
   upcomingActivities: Activity[];
+  recentNotifications: AppNotification[];
 }

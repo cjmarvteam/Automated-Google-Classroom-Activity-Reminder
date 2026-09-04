@@ -8,9 +8,10 @@ import { motion } from 'framer-motion';
 import { Plus, BookOpen, Users, Trash2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Classrooms() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: classrooms = [], isLoading } = useQuery({
     queryKey: ['classrooms'],
@@ -154,7 +155,7 @@ export default function Classrooms() {
                   cursor: 'pointer',
                   transition: 'border-color 0.2s ease',
                 }}
-                onClick={() => window.location.href = '/activities'}
+                onClick={() => navigate('/activities')}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(196, 132, 90, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -179,7 +180,7 @@ export default function Classrooms() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(44, 36, 30, 0.04)', paddingTop: '0.75rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'rgba(44, 36, 30, 0.4)' }}>
                     <Users style={{ width: '14px', height: '14px' }} />
-                    <span>{(classroom as any)._count?.activities || 0} activities</span>
+                    <span>{classroom._count?.activities || 0} activities</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.7rem', color: 'rgba(44, 36, 30, 0.3)' }}>
                     View <ArrowRight style={{ width: '12px', height: '12px' }} />

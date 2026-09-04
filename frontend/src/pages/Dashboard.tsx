@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchActivities, fetchUpcomingActivities, fetchClassrooms } from '../services/api';
+import { getDashboard } from '../services/api';
 import { FocusSession } from '../components/dashboard/FocusSession';
 import { UpcomingActivities } from '../components/dashboard/UpcomingActivities';
-import { LiveMetrics } from '../components/ui/LiveMetrics';
-import { Marquee } from '../components/ui/Marquee';
-import { Reveal } from '../components/ui/Reveal';
 import { SkeletonLoader } from '../components/ui/SkeletonLoader';
 import { Calendar, ArrowRight, BookOpen, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -13,21 +10,13 @@ import { useAuthStore } from '../store/authStore';
 
 export default function Dashboard() {
   const user = useAuthStore((s) => s.user);
-  const { data: allActivities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['activities'],
-    queryFn: fetchActivities,
-  });
-  const { data: upcoming = [], isLoading: upcomingLoading } = useQuery({
-    queryKey: ['upcoming'],
-    queryFn: () => fetchUpcomingActivities(5),
-  });
-  const { data: classrooms = [] } = useQuery({
-    queryKey: ['classrooms'],
-    queryFn: fetchClassrooms,
+  const { data: dashboard, isLoading } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: getDashboard,
   });
 
-  const isLoading = activitiesLoading || upcomingLoading;
-  const subjects = [...new Set(allActivities?.map((a) => a.subject) || [])];
+  const stats = dashboard?.stats;
+  const upcoming = dashboard?.upcomingActivities || [];
 
   const hour = new Date().getHours();
   let greeting = 'Good evening';
@@ -39,7 +28,7 @@ export default function Dashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
       <section>
-        <Reveal>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <div className="flex flex-col gap-1">
             <span className="label-sm" style={{ color: '#c4845a' }}>Dashboard</span>
             <h1 style={{ fontSize: 'clamp(2.5rem, 4vw, 3.5rem)', fontWeight: 600, lineHeight: 1.06, letterSpacing: '-0.03em', color: '#2c241e' }}>
@@ -49,8 +38,6 @@ export default function Dashboard() {
               Here's your academic overview for today. Stay ahead of every classroom activity.
             </p>
           </div>
-        </Reveal>
-        <Reveal delay={0.1}>
           <div className="flex flex-wrap gap-3 mt-4">
             <Link to="/classrooms">
               <motion.button className="btn-editorial btn-editorial-primary" whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}>
@@ -68,7 +55,7 @@ export default function Dashboard() {
               </motion.button>
             </Link>
           </div>
-        </Reveal>
+        </motion.div>
       </section>
 
       <section>
@@ -77,14 +64,14 @@ export default function Dashboard() {
           <div className="h-px flex-1 bg-gray-200" />
           <span className="text-xs uppercase tracking-wider text-gray-400">Quick Stats</span>
         </div>
-        <Reveal>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
           {isLoading ? <SkeletonLoader variant="card" /> : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Classrooms', value: classrooms.length, icon: Users, color: '#c4845a' },
-                { label: 'Activities', value: allActivities?.length || 0, icon: BookOpen, color: '#d4a77a' },
-                { label: 'Upcoming', value: upcoming.length, icon: Calendar, color: '#2c241e' },
-                { label: 'Completed', value: allActivities?.filter(a => a.status === 'completed').length || 0, icon: ArrowRight, color: '#27ae60' },
+                { label: 'Classrooms', value: stats?.totalClassrooms || 0, icon: Users, color: '#c4845a' },
+                { label: 'Activities', value: stats?.totalActivities || 0, icon: BookOpen, color: '#d4a77a' },
+                { label: 'Pending', value: stats?.pendingActivities || 0, icon: Calendar, color: '#2c241e' },
+                { label: 'Overdue', value: stats?.overdueActivities || 0, icon: ArrowRight, color: '#e74c3c' },
               ].map((stat) => (
                 <motion.div
                   key={stat.label}
@@ -108,66 +95,53 @@ export default function Dashboard() {
               ))}
             </div>
           )}
-        </Reveal>
+        </motion.div>
       </section>
-
-      {subjects.length > 0 && (
-        <section>
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-sm font-mono text-gray-300">02</span>
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-xs uppercase tracking-wider text-gray-400">Subjects</span>
-          </div>
-          <div className="bg-white border border-gray-100 rounded-lg py-4">
-            <Marquee items={subjects} speed={30} />
-          </div>
-        </section>
-      )}
 
       <section>
         <div className="flex items-center gap-4 mb-4">
-          <span className="text-sm font-mono text-gray-300">{subjects.length > 0 ? '03' : '02'}</span>
+          <span className="text-sm font-mono text-gray-300">02</span>
           <div className="h-px flex-1 bg-gray-200" />
           <span className="text-xs uppercase tracking-wider text-gray-400">Focus</span>
         </div>
         <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: '1fr' }} className="lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <Reveal delay={0.05}>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>
               {isLoading ? <SkeletonLoader variant="card" /> : <FocusSession />}
-            </Reveal>
+            </motion.div>
           </div>
           <div className="lg:col-span-1">
-            <Reveal delay={0.1}>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
               {isLoading ? <SkeletonLoader variant="activity" count={3} /> : <UpcomingActivities activities={upcoming} />}
-            </Reveal>
+            </motion.div>
           </div>
         </div>
       </section>
 
       <section>
         <div className="flex items-center gap-4 mb-4">
-          <span className="text-sm font-mono text-gray-300">{subjects.length > 0 ? '04' : '03'}</span>
+          <span className="text-sm font-mono text-gray-300">03</span>
           <div className="h-px flex-1 bg-gray-200" />
           <span className="text-xs uppercase tracking-wider text-gray-400">Calendar</span>
         </div>
-        <Reveal delay={0.05}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 }}>
           <div style={{ background: '#ffffff', border: '1px solid rgba(44, 36, 30, 0.08)', borderRadius: '6px', padding: '1.5rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <span className="label-sm" style={{ color: '#c4845a' }}>Calendar</span>
               <p style={{ fontSize: '1rem', fontWeight: 500, color: '#2c241e', marginTop: '0.25rem' }}>View all your deadlines in one place</p>
-              <p className="text-sm text-gray-400 mt-0.5">{allActivities?.length || 0} activities scheduled</p>
+              <p className="text-sm text-gray-400 mt-0.5">{stats?.totalActivities || 0} activities scheduled</p>
             </div>
             <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.15 }}>
-              <Link to="/calendar" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.25rem', fontSize: '0.875rem', fontWeight: 500, borderRadius: '6px', border: '1px solid rgba(44, 36, 30, 0.08)', background: 'transparent', color: '#2c241e', textDecoration: 'none', transition: 'border-color 0.2s ease, background 0.2s ease' }}>
+              <Link to="/calendar" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.25rem', fontSize: '0.875rem', fontWeight: 500, borderRadius: '6px', border: '1px solid rgba(44, 36, 30, 0.08)', background: 'transparent', color: '#2c241e', textDecoration: 'none' }}>
                 <Calendar style={{ width: '16px', height: '16px' }} /> Open Calendar <ArrowRight style={{ width: '14px', height: '14px' }} />
               </Link>
             </motion.div>
           </div>
-        </Reveal>
+        </motion.div>
       </section>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(44, 36, 30, 0.06)' }}>
-        <span style={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.12em', color: 'rgba(44, 36, 30, 0.2)' }}>SECTION 04</span>
+        <span style={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.12em', color: 'rgba(44, 36, 30, 0.2)' }}>CLASSREMIND</span>
         <span style={{ flex: 1, height: '1px', background: 'rgba(44, 36, 30, 0.06)' }} />
         <span style={{ fontSize: '0.6rem', color: 'rgba(44, 36, 30, 0.15)' }}>
           {new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
