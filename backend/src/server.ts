@@ -23,7 +23,18 @@ app.use(helmet());
 
 // cors: Allows frontend (running on different port) to make API requests
 // credentials: true allows cookies/auth headers to be sent cross-origin
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+// Supports multiple comma-separated FRONTEND_URL values
+const allowedOrigins = (process.env.FRONTEND_URL || '').split(',').map((o) => o.trim()).filter(Boolean);
+app.use(cors({
+  origin: allowedOrigins.length > 0 ? (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  } : '*',
+  credentials: true,
+}));
 
 // morgan: HTTP request logger - pipes to our custom logger
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
